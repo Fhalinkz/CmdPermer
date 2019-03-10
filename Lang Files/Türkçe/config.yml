@@ -1,0 +1,26 @@
+bypass_permission: cmdpermer.bypass
+
+playerGroupChanged_Message: '&8(&cCmdPermer&8) &4%player% adlı oyuncunun grubu %group% olarak değiştirildi.'
+
+commandAdded_Message: '&8(&cCmdPermer&8) &4Komut başarıyla %group%'una eklendi.'
+
+noPermission_Message: '&8(&cCmdPermer&8) &4Bu komutu kullanabilmek için gerekli izne sahip değilsin.'
+
+default_group: player
+
+groups:
+    player:
+        commands:
+        - commands
+        - balance
+    vip:
+        commands:
+        - fly
+        inheritance:
+        - player
+    vip+:
+        commands:
+        - kill
+        inheritance:
+        - vip
+        - player
