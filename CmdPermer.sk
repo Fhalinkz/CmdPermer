@@ -1,4 +1,4 @@
-command /skGroup [<text>] [<text>] [<text>] [<text>] [<player>]:
+command /CmdPermer [<text>] [<text>] [<text>] [<text>] [<player>]:
 	permission: cmdpermer.admin
 	trigger:
 		if arg-1 isn't set:
