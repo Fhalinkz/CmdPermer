@@ -1,0 +1,79 @@
+command /skGroup [<text>] [<text>] [<text>] [<text>] [<player>]:
+	permission: cmdpermer.admin
+	trigger:
+		if arg-1 isn't set:
+			execute player command "skGroup help"
+		if arg-1 is "help":
+			send "&8(&cCmdPermer&8) &6/skGroup set group [group] [player]    | Set player's group to other group"
+			send "&8(&cCmdPermer&8) &6/skGroup add command [command] [group] | Add command to group"
+		if arg-1 is "set":
+			if arg-2 is "group":
+				if arg-5 is set:
+					if arg-3 == arg-4:
+						set {_player} to arg-4 parsed as player
+						set yaml value "players.%{_player}%" from "CmdPermer" to arg-3
+						save yaml "CmdPermer"
+						set {_var} to yaml value "playerGroupChanged_Message" from "CmdPermer" 
+						replace "%%player%%" with "%arg-5%" in {_var}
+						replace "%%group%%" with arg-4 in {_var}
+						send {_var}
+				else:
+					send "/skGroup set group [group] [player] | set player's group to group"
+					
+		if arg-1 is "add":
+			if arg-2 is "command":
+				if arg-3 is set:
+					add arg-3 to yaml list "groups.%arg-4%.commands" from "CmdPermer"
+					save yaml "CmdPermer"
+					set {_var} to yaml value "commandAdded_Message" from "CmdPermer"
+					replace "%%group%%" with arg-4 in {_var}
+					send {_var}
+				else:
+					send "/skGroup add command [command] [group] | add command to group"
+		
+command /commands:
+	trigger:
+		set {_playergroup} to yaml value "players.%player%" from "CmdPermer"
+		set {_s::*} to getCommands({_playergroup}) 
+		send {_s::*}
+			
+on join:
+	if yaml value "players.%player%" from "CmdPermer" isn't set:
+		set {_default} to yaml value "default_group" from "CmdPermer"
+		set yaml value "players.%player%" from "CmdPermer" to {_default}
+		Save yaml "CmdPermer"
+
+on load:
+	load yaml "plugins/CmdPermer/config.yml" as "CmdPermer"
+	if yaml "CmdPermer" is empty:
+		set yaml value "bypass_permission" from "CmdPermer" to "cmdpermer.bypass"
+		set yaml value "playerGroupChanged_Message" from "CmdPermer" to "§8(§cCmdPermer§8) §4%%player%%'s group changed to %%group%%."
+		set yaml value "commandAdded_Message" from "CmdPermer" to "§8(§cCmdPermer§8) §4Command succesfully added to %%group%% group."
+		set yaml value "noPermission_Message" from "CmdPermer" to "§8(§cCmdPermer§8) §4You don't have permission to use this command."
+		set yaml value "default_group" from "CmdPermer" to "player"
+		add "balance" to yaml list "groups.player.commands" from "CmdPermer"
+		add "commands" to yaml list "groups.player.commands" from "CmdPermer"
+		add "vipstr" to yaml list "groups.vip.commands" from "CmdPermer"
+		add "fly" to yaml list "groups.vip+.commands" from "CmdPermer"
+		add "player" to yaml list "groups.vip.inheritance" from "CmdPermer"
+		add "player" to yaml list "groups.vip+.inheritance" from "CmdPermer"
+		add "vip" to yaml list "groups.vip+.inheritance" from "CmdPermer"
+		save yaml "CmdPermer" without extra lines between nodes
+	send "§8(§cCmdPermer§8) §6CmdPermer succesfully reloaded." to console
+	
+function getCommands(group: object) :: texts:
+    add yaml list "groups.%{_group}%.commands" from "CmdPermer" to {_commands::*}
+    loop yaml list "groups.%{_group}%.inheritance" from "CmdPermer":
+        add getCommands("%loop-value%") to {_commands::*}
+    return {_commands::*}
+    
+command:
+    set {_permission} to yaml value "bypass_permission" from "CmdPermer"
+    if player doesn't have permission {_permission}:
+        if player isn't op:
+            if command sender isn't console:
+                set {_playergroup} to yaml value "players.%player%" from "CmdPermer"
+                set {_s::*} to getCommands({_playergroup}) 
+                {_s::*} doesn't contain command:
+                    cancel event
+                    send "%yaml value ""noPermission_Message"" from ""CmdPermer""%"
