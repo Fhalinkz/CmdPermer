@@ -1,0 +1,27 @@
+bypass_permission: cmdpermer.bypass
+
+playerGroupChanged_Message: '&8(&cCmdPermer&8) &4%player%''s group changed to %group%.'
+
+commandAdded_Message: '&8(&cCmdPermer&8) &4Command succesfully added to %group%.'
+
+noPermission_Message: '&8(&cCmdPermer&8) &4You don''t have permission to use this
+    command.'
+
+default_group: player
+
+groups:
+    player:
+        commands:
+        - commands
+        - balance
+    vip:
+        commands:
+        - fly
+        inheritance:
+        - player
+    vip+:
+        commands:
+        - kill
+        inheritance:
+        - vip
+        - player
